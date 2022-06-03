@@ -9,12 +9,45 @@ import {
   Image,
 } from 'react-native';
 
-export default function Login() {
+import firebase from '../../services/firebaseConnection';
+
+export default function Login({status}) {
+  const [type, setType] = useState('login');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   function handlelogin() {
-    alert('clicou');
+    if (type === 'login') {
+      const user = firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then(user => {
+          status(user.user.uid);
+        })
+        .catch(error => {
+          console.log(error);
+          alert('ops, parece que aconteceu algum erro...');
+          return;
+        });
+    } else {
+      const user = firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then(user => {
+          console.log(user.user);
+          setType('login');
+          setEmail('');
+          setPassword('');
+        })
+        .catch(error => {
+          console.log(error);
+          alert(
+            'erro ao cadastrar usuário, tente novamente dentro de alguns segundos',
+          );
+          return;
+        });
+    }
   }
 
   return (
@@ -43,12 +76,28 @@ export default function Login() {
             setPassword(text);
           }}
         />
-        <TouchableOpacity style={styles.handlelogin} onPress={handlelogin}>
-          <Text style={styles.handlelogintext}> Acessar </Text>
+        <TouchableOpacity
+          style={[
+            styles.handlelogin,
+            {backgroundColor: type === 'login' ? '#4e73b9' : '#f0c517'},
+          ]}
+          onPress={handlelogin}>
+          <Text style={styles.handlelogintext}>
+            {' '}
+            {type === 'login' ? 'Acessar' : 'Cadastrar'}{' '}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={() => {
+            setType(type === 'login' ? 'cadastrar' : 'login');
+          }}
           style={{justifyContent: 'center', alignItems: 'center'}}>
-          <Text> Criar uma conta </Text>
+          <Text>
+            {' '}
+            {type === 'login'
+              ? 'Criar uma conta Grátis'
+              : 'Já possuo uma conta'}{' '}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -82,7 +131,6 @@ const styles = StyleSheet.create({
   handlelogin: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
     margin: 5,
     height: 45,
     borderRadius: 5,
