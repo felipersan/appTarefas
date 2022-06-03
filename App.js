@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,31 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
+
+  useEffect(() => {
+    function getTasks() {
+      if (!user) {
+        return;
+      }
+
+      firebase
+        .database()
+        .ref('tarefas')
+        .child(user)
+        .once('value', snapshot => {
+          setTasks([]);
+          snapshot.forEach(childItem => {
+            let data = {
+              key: childItem.key,
+              nome: childItem.val().nome,
+            };
+            setTasks(oldTasks => [...oldTasks, data]);
+          });
+        });
+    }
+
+    getTasks();
+  }, [user]);
 
   function handleAdd() {
     if (newTask === '') {
