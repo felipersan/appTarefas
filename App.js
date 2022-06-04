@@ -23,6 +23,8 @@ export default function App() {
   const inputRef = useRef(null);
   const [key, setKey] = useState('');
 
+  const [priority, setPriority] = useState('Baixa');
+
   useEffect(() => {
     function getTasks() {
       if (!user) {
@@ -39,6 +41,7 @@ export default function App() {
             let data = {
               key: childItem.key,
               nome: childItem.val().nome,
+              priority: childItem.val().priority,
             };
             setTasks(oldTasks => [...oldTasks, data]);
           });
@@ -59,6 +62,7 @@ export default function App() {
         .child(key)
         .update({
           nome: newTask,
+          priority: priority,
         })
         .then(() => {
           const findTask = tasks.findIndex(item => item.key === key);
@@ -83,6 +87,7 @@ export default function App() {
           let data = {
             key: key,
             nome: newTask,
+            priority: priority,
           };
           setTasks(oldTasks => [...oldTasks, data]);
           setNewTask('');
@@ -136,6 +141,33 @@ export default function App() {
           <Text style={styles.btnadd}>+</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.masterpriority}>
+        <Text>Selecione a prioridade da tarefa</Text>
+        <View style={styles.priorityarea}>
+          <TouchableOpacity
+            style={[styles.priority, {backgroundColor: '#4e73b9'}]}
+            onPress={() => {
+              setPriority('Baixa');
+            }}>
+            <Text style={styles.textpriority}> Baixa </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.priority, {backgroundColor: '#f1c617'}]}
+            onPress={() => {
+              setPriority('Média');
+            }}>
+            <Text style={[styles.textpriority, {color: '#000'}]}> Média </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.priority, {backgroundColor: '#eb472d'}]}
+            onPress={() => {
+              setPriority('Alta');
+            }}>
+            <Text style={styles.textpriority}> Alta </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <FlatList
         data={tasks}
         keyExtractor={item => item.key}
@@ -183,6 +215,24 @@ const styles = StyleSheet.create({
   },
   btnadd: {
     fontSize: 23,
+    color: '#fff',
+  },
+  masterpriority: {
+    marginLeft: 10,
+  },
+  priorityarea: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  priority: {
+    paddingHorizontal: 7,
+    paddingVertical: 4,
+    borderRadius: 7,
+    marginTop: 9,
+    marginRight: 10,
+    elevation: 2,
+  },
+  textpriority: {
     color: '#fff',
   },
 });
