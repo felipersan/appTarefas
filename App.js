@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,9 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
+
+  const inputRef = useRef(null);
+  const [key, setKey] = useState('');
 
   useEffect(() => {
     function getTasks() {
@@ -48,6 +51,25 @@ export default function App() {
   function handleAdd() {
     if (newTask === '') {
       return;
+    } else if (key !== '') {
+      firebase
+        .database()
+        .ref('tarefas')
+        .child(user)
+        .child(key)
+        .update({
+          nome: newTask,
+        })
+        .then(() => {
+          const findTask = tasks.findIndex(item => item.key === key);
+          let cloneTasks = tasks;
+          cloneTasks[findTask].nome = newTask;
+          setTasks([...cloneTasks]);
+        });
+      Keyboard.dismiss();
+      setNewTask('');
+      setKey('');
+      return;
     } else {
       let tarefas = firebase.database().ref('tarefas').child(user);
       let key = tarefas.push().key;
@@ -70,11 +92,22 @@ export default function App() {
   }
 
   function handleDelete(key) {
-    console.log(key);
+    firebase
+      .database()
+      .ref('tarefas')
+      .child(user)
+      .child(key)
+      .remove()
+      .then(() => {
+        let findTask = tasks.filter(item => item.key !== key);
+        setTasks(findTask);
+      });
   }
 
   function handleEdit(tarefa) {
-    console.log(tarefa);
+    setNewTask(tarefa.nome);
+    inputRef.current.focus();
+    setKey(tarefa.key);
   }
 
   if (!user) {
@@ -97,6 +130,7 @@ export default function App() {
           onChangeText={value => {
             setNewTask(value);
           }}
+          ref={inputRef}
         />
         <TouchableOpacity style={styles.btnarea} onPress={handleAdd}>
           <Text style={styles.btnadd}>+</Text>

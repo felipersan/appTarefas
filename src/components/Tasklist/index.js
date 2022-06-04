@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,42 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 
 export default function TaskList({tarefa, deleteItem, editItem}) {
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => editItem(tarefa)}>
-        <Text>{tarefa.nome}</Text>
-      </TouchableOpacity>
+  const [altura, setAltura] = useState(45);
 
-      <TouchableOpacity onPress={() => deleteItem(tarefa.key)}>
-        <Feather name="trash" color="#121212" size={20} />
+  function slideOut() {
+    if (altura == 45) {
+      setAltura(80);
+    } else {
+      setAltura(45);
+    }
+  }
+
+  return (
+    <View style={[styles.container, {height: altura}]}>
+      <View>
+        <Text style={styles.tarefa}>{tarefa.nome}</Text>
+        <View style={styles.editarea}>
+          <TouchableOpacity onPress={() => editItem(tarefa)}>
+            <Text style={[styles.editTasks]}>
+              {altura !== 45 && 'Editar Tarefa'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.trash}
+            onPress={() => deleteItem(tarefa.key)}>
+            {altura !== 45 && (
+              <Feather name={'trash'} color="#121212" size={16} />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <TouchableOpacity onPress={slideOut}>
+        <Feather
+          name={altura == 45 ? 'chevron-down' : 'chevron-up'}
+          color="#121212"
+          size={20}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -27,11 +55,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0c517',
     elevation: 1,
-    height: 45,
     marginBottom: 5,
     padding: 10,
     marginHorizontal: 5,
     justifyContent: 'space-between',
     flexDirection: 'row',
+  },
+  tarefa: {
+    fontSize: 15,
+    color: '#121212',
+  },
+  editarea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  editTasks: {
+    padding: 5,
+    borderRadius: 4,
+  },
+  trash: {
+    marginLeft: 10,
   },
 });
